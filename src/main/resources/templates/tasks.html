@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Tasks</title>
+</head>
+<body>
+	<h1>Tasks</h1>
+	<button onclick="window.location.href = '/';">Home</button><br>
+	<button onclick="window.location.href = '/tasks/new';">New task</button><br>
+	<hr>
+	<div th:each="elem : ${tasks}">
+		<h3 th:text="${elem.title}"/>
+		<h3 th:text="${elem.description}"/>
+		<hr>
+	</div>
+</body>
+</html>

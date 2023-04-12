@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>New task</title>
+</head>
+<body>
+	<h1>Create new task</h1>
+	<button onclick="window.location.href = '/';">Home</button><br>
+	<button onclick="window.location.href = '/tasks';">Tasks</button><br>
+	<hr>
+	<form action="/tasks/new/form" method="get">
+		<input type="text" name="title" placeholder="Title"><br>
+		<input type="text" name="description" placeholder="Description"><br>
+		<input type="submit" value="Create"><br>
+	</form>
+</body>
+</html>
