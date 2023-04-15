@@ -7,17 +7,32 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+/**
+ * Конфигурация безопасности для Spring Security.
+ */
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    /**
+     * Компонент аутентификации, используемый для аутентификации пользователей.
+     */
     @Autowired
     AuthProvider authProvider;
 
+    /**
+     * Конфигурирует менеджер аутентификации, чтобы использовать собственный компонент аутентификации.
+     * @param auth AuthenticationManagerBuilder, используемый для настройки менеджера аутентификации.
+     */
     @Override
-    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+    public void configure(AuthenticationManagerBuilder auth) {
         auth.authenticationProvider(authProvider);
     }
 
+    /**
+     * Конфигурирует разрешённые веб-страницы.
+     * @param http HttpSecurity, используемый для настройки разрешённых веб-страниц.
+     * @throws Exception если возникает ошибка при настройке.
+     */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()

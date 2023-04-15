@@ -9,12 +9,26 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.security.Principal;
 
+/**
+ * Контроллер для главной страницы.
+ */
 @Controller
 public class IndexController {
 
+    /**
+     * Репозиторий пользователей, используемый для поиска пользователей в базе данных.
+     */
     @Autowired
     UserRepository userRepository;
 
+    /**
+     * Отображает главную страницу.
+     * Если пользователь не аутентифицирован, отображается стандартная главная страница.
+     * Если пользователь аутентифицирован, отображается главная страница с приветствием пользователя.
+     * @param principal объект Principal, содержащий имя текущего пользователя.
+     * @param model объект Model, используемый для передачи данных в шаблон представления.
+     * @return имя файла веб-страницы.
+     */
     @GetMapping("/")
     public String index(Principal principal, Model model) {
         if (principal == null) {
