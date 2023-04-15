@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8">
 	<title>Index</title>
 </head>
 <body>
 	<h1>Task system</h1>
+	<h2 th:text="'Welcome, '+${username}"/>
 	<button onclick="window.location.href = '/logout';">Sign out</button><br>
 	<br>
 	<button onclick="window.location.href = '/tasks';">Tasks</button><br>

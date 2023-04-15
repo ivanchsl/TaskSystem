@@ -10,8 +10,17 @@
 	<button onclick="window.location.href = '/tasks/new';">New task</button><br>
 	<hr>
 	<div th:each="elem : ${tasks}">
-		<h3 th:text="${elem.title}"/>
-		<h3 th:text="${elem.description}"/>
+		<span th:style="${elem.style}">
+			<h3 th:text="${elem.title}"/>
+			<h3 th:text="${elem.start}+' - '+${elem.deadline}"></h3>
+			<h3 th:text="${elem.description}"/>
+		</span>
+		<form action="/tasks/form" method="get">
+			<input type="radio" th:id="'remove'+${elem.id}" name="action" value="remove">
+			<label th:for="'remove'+${elem.id}">Remove</label>
+			<input type="hidden" th:id="'taskId'+${elem.id}" name="taskId" th:value="${elem.id}">
+			<input type="submit" value="Submit"><br>
+		</form>
 		<hr>
 	</div>
 </body>
