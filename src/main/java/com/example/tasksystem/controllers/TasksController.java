@@ -54,6 +54,7 @@ public class TasksController {
         List<Task> tasks = user.getTasks();
         tasks.sort(new TaskComparator());
         model.addAttribute("tasks", tasks);
+        model.addAttribute("users", userRepository.findAll());
         return "tasks";
     }
 
@@ -94,21 +95,37 @@ public class TasksController {
     /**
      * Обрабатывает запрос на удаление задачи.
      * @param taskId идентификатор задачи, которую нужно удалить.
-     * @param action действие, которое нужно выполнить: удаление задачи.
+     * @param userId идентификатор пользователя, которому нужно передать задачу.
+     * @param action действие, которое нужно выполнить: передача или удаление задачи.
      * @return перенаправление на страницу со списком задач пользователя.
      */
     @GetMapping("/tasks/form")
-    public String taskForm(Principal principal, @RequestParam String taskId, @RequestParam(required = false) String action) {
-        if ((action == null) || (principal == null)) {
-            return "redirect:/tasks";
+    public String taskForm(Principal principal, @RequestParam String taskId, @RequestParam String userId, @RequestParam(required = false) String action) {
+        String redirect = "redirect:/tasks";
+        if (principal == null) {
+            return redirect;
         }
         User user = userRepository.findByUsername(principal.getName());
-        Optional<Task> task = taskRepository.findById(parseLong(taskId));
-        if (task.isEmpty()) {
-            return "redirect:/tasks";
+        Optional<Task> optionalTask = taskRepository.findById(parseLong(taskId));
+        if (optionalTask.isEmpty()) {
+            return redirect;
         }
-        taskRepository.delete(task.get());
-        return "redirect:/tasks";
+        Task task = optionalTask.get();
+        if (!task.getUser().getId().equals(user.getId())) {
+            return redirect;
+        }
+        if ("throw".equals(action)) {
+            Optional<User> optionalUser = userRepository.findById(parseLong(userId));
+            if (optionalUser.isEmpty()) {
+                return redirect;
+            }
+            task.setUser(optionalUser.get());
+            taskRepository.save(task);
+        }
+        if ("remove".equals(action)) {
+            taskRepository.delete(task);
+        }
+        return redirect;
     }
 
 }

@@ -47,6 +47,7 @@ class TasksControllerTest {
     void setUp() {
         user = new User();
         user.setUsername("testuser");
+        user.setId(1L);
         tasks = Arrays.asList(
                 new Task("Task1", "Description1", user, LocalDate.now()),
                 new Task("Task2", "Description2", user, LocalDate.now().plusDays(1))
@@ -107,33 +108,85 @@ class TasksControllerTest {
     }
 
     @Test
-    void testTaskFormIfAuthorized() {
+    void testTaskFormRemoveIfAuthorized() {
         String taskId = "1";
-        String action = "delete";
+        String userId = "1";
+        String action = "remove";
         when(principal.getName()).thenReturn("testuser");
         when(userRepository.findByUsername("testuser")).thenReturn(user);
         when(taskRepository.findById(Long.parseLong(taskId))).thenReturn(Optional.of(tasks.get(0)));
 
-        String result = tasksController.taskForm(principal, taskId, action);
+        String result = tasksController.taskForm(principal, taskId, userId, action);
         assertEquals("redirect:/tasks", result);
         verify(taskRepository).findById(Long.parseLong(taskId));
         verify(taskRepository).delete(tasks.get(0));
     }
 
     @Test
+    void testTaskFormThrowIfAuthorized() {
+        String taskId = "1";
+        String userId = "1";
+        String action = "throw";
+        when(principal.getName()).thenReturn("testuser");
+        when(userRepository.findById(Long.parseLong(userId))).thenReturn(Optional.of(user));
+        when(userRepository.findByUsername("testuser")).thenReturn(user);
+        when(taskRepository.findById(Long.parseLong(taskId))).thenReturn(Optional.of(tasks.get(0)));
+
+        String result = tasksController.taskForm(principal, taskId, userId, action);
+        assertEquals("redirect:/tasks", result);
+        verify(taskRepository).findById(Long.parseLong(taskId));
+        verify(taskRepository).save(tasks.get(0));
+    }
+
+    @Test
+    void testTaskFormThrowIfBlankUser() {
+        String taskId = "1";
+        String userId = "1";
+        String action = "throw";
+        when(principal.getName()).thenReturn("testuser");
+        when(userRepository.findById(Long.parseLong(userId))).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("testuser")).thenReturn(user);
+        when(taskRepository.findById(Long.parseLong(taskId))).thenReturn(Optional.of(tasks.get(0)));
+
+        String result = tasksController.taskForm(principal, taskId, userId, action);
+        assertEquals("redirect:/tasks", result);
+        verify(taskRepository).findById(Long.parseLong(taskId));
+        verify(taskRepository, never()).save(tasks.get(0));
+    }
+
+    @Test
+    void testTaskFormThrowIfWrongUser() {
+        String taskId = "1";
+        String userId = "1";
+        String action = "throw";
+        User user2 = new User();
+        user2.setId(2L);
+        when(principal.getName()).thenReturn("testuser");
+        when(userRepository.findByUsername("testuser")).thenReturn(user2);
+        when(taskRepository.findById(Long.parseLong(taskId))).thenReturn(Optional.of(tasks.get(0)));
+
+        String result = tasksController.taskForm(principal, taskId, userId, action);
+        assertEquals("redirect:/tasks", result);
+        verify(taskRepository).findById(Long.parseLong(taskId));
+        verify(taskRepository, never()).save(tasks.get(0));
+    }
+
+    @Test
     void testTaskFormIfUnauthorized() {
         String taskId = "1";
+        String userId = "1";
         String action = "delete";
-        String result = tasksController.taskForm(null, taskId, action);
+        String result = tasksController.taskForm(null, taskId, userId, action);
         assertEquals("redirect:/tasks", result);
     }
 
     @Test
     void testTaskFormIfWrongTask() {
         String taskId = "1";
+        String userId = "1";
         String action = "delete";
         when(taskRepository.findById(Long.parseLong(taskId))).thenReturn(Optional.empty());
-        String result = tasksController.taskForm(principal, taskId, action);
+        String result = tasksController.taskForm(principal, taskId, userId, action);
         assertEquals("redirect:/tasks", result);
     }
 

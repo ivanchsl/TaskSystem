@@ -9,16 +9,25 @@
 	<button onclick="window.location.href = '/';">Home</button><br>
 	<button onclick="window.location.href = '/tasks/new';">New task</button><br>
 	<hr>
-	<div th:each="elem : ${tasks}">
-		<span th:style="${elem.style}">
-			<h3 th:text="${elem.title}"/>
-			<h3 th:text="${elem.start}+' - '+${elem.deadline}"></h3>
-			<h3 th:text="${elem.description}"/>
+	<div th:each="task : ${tasks}">
+		<span th:style="${task.style}">
+			<h3 th:text="${task.title}"/>
+			<h3 th:text="${task.start}+' - '+${task.deadline}"></h3>
+			<h3 th:text="${task.description}"/>
 		</span>
 		<form action="/tasks/form" method="get">
-			<input type="radio" th:id="'remove'+${elem.id}" name="action" value="remove">
-			<label th:for="'remove'+${elem.id}">Remove</label>
-			<input type="hidden" th:id="'taskId'+${elem.id}" name="taskId" th:value="${elem.id}">
+			<input type="hidden" th:id="'taskId'+${task.id}" name="taskId" th:value="${task.id}">
+			<input type="radio" th:id="'throw'+${task.id}" name="action" value="throw">
+			<label th:for="'remove'+${task.id}">Throw</label>
+			<select name="userId">
+				<span th:each="user : ${users}">
+					<option th:value="${user.id}" th:text="${user.username}"/>
+				</span>
+			</select>
+			<br>
+			<input type="radio" th:id="'remove'+${task.id}" name="action" value="remove">
+			<label th:for="'remove'+${task.id}">Remove</label>
+			<br>
 			<input type="submit" value="Submit"><br>
 		</form>
 		<hr>
