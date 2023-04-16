@@ -9,9 +9,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -43,10 +45,11 @@ public class TasksController {
      * Сортирует задачи пользователя по дедлайну и добавляет их в модель для отображения на странице.
      * @param principal объект, содержащий информацию об авторизованном пользователе.
      * @param model модель для передачи данных на веб-страницу.
+     * @param message сообщение для пользователя.
      * @return имя файла веб-страницы или шаблон перенаправления.
      */
     @GetMapping("/tasks")
-    public String tasks(Principal principal, Model model) {
+    public String tasks(Principal principal, Model model, @RequestParam(required = false) String message) {
         if (principal == null) {
             return "redirect:/";
         }
@@ -55,7 +58,24 @@ public class TasksController {
         tasks.sort(new TaskComparator());
         model.addAttribute("tasks", tasks);
         model.addAttribute("users", userRepository.findAll());
+        model.addAttribute("modified", user.getLastModified().toString());
+        model.addAttribute("message", message);
         return "tasks";
+    }
+
+    /**
+     * Обрабатывает запрос на получение времени последнего изменения списка задач пользователя.
+     * @param principal объект, содержащий информацию об авторизованном пользователе.
+     * @return искомое время.
+     */
+    @GetMapping("/getLastModified")
+    @ResponseBody
+    public String getLastModified(Principal principal) {
+        if (principal == null) {
+            return "";
+        }
+        User user = userRepository.findByUsername(principal.getName());
+        return user.getLastModified().toString();
     }
 
     /**
@@ -89,43 +109,51 @@ public class TasksController {
         }
         User user = userRepository.findByUsername(principal.getName());
         taskRepository.save(new Task(title, description, user, LocalDate.parse(deadline)));
+        user.setLastModified(LocalDateTime.now());
+        userRepository.save(user);
         return "redirect:/tasks";
     }
 
     /**
-     * Обрабатывает запрос на удаление задачи.
-     * @param taskId идентификатор задачи, которую нужно удалить.
+     * Обрабатывает запрос на изменение задачи.
+     * @param taskId идентификатор задачи, над которой производится действие.
      * @param userId идентификатор пользователя, которому нужно передать задачу.
      * @param action действие, которое нужно выполнить: передача или удаление задачи.
-     * @return перенаправление на страницу со списком задач пользователя.
+     * @return перенаправление на страницу со списком задач пользователя с, возможно, сообщением.
      */
     @GetMapping("/tasks/form")
     public String taskForm(Principal principal, @RequestParam String taskId, @RequestParam String userId, @RequestParam(required = false) String action) {
-        String redirect = "redirect:/tasks";
         if (principal == null) {
-            return redirect;
+            return "redirect:/tasks?message=Error: You must be authorized.";
         }
         User user = userRepository.findByUsername(principal.getName());
         Optional<Task> optionalTask = taskRepository.findById(parseLong(taskId));
         if (optionalTask.isEmpty()) {
-            return redirect;
+            return "redirect:/tasks?message=Error: Task not found.";
         }
         Task task = optionalTask.get();
         if (!task.getUser().getId().equals(user.getId())) {
-            return redirect;
+            return "redirect:/tasks?message=Error: You can't do anything with other user's task.";
         }
         if ("throw".equals(action)) {
             Optional<User> optionalUser = userRepository.findById(parseLong(userId));
             if (optionalUser.isEmpty()) {
-                return redirect;
+                return "redirect:/tasks?message=Error: User not found.";
             }
-            task.setUser(optionalUser.get());
+            User targetUser = optionalUser.get();
+            task.setUser(targetUser);
             taskRepository.save(task);
+            targetUser.setLastModified(LocalDateTime.now());
+            userRepository.save(targetUser);
+            user.setLastModified(LocalDateTime.now());
+            userRepository.save(user);
         }
         if ("remove".equals(action)) {
             taskRepository.delete(task);
+            user.setLastModified(LocalDateTime.now());
+            userRepository.save(user);
         }
-        return redirect;
+        return "redirect:/tasks";
     }
 
 }

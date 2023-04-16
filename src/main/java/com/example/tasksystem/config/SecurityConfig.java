@@ -39,6 +39,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/").permitAll()
                 .antMatchers("/reg", "/reg/form").anonymous()
                 .antMatchers("/tasks", "/tasks/new", "/tasks/new/form", "/tasks/form").authenticated()
+                .antMatchers("/getLastModified").authenticated()
                 .anyRequest().denyAll()
                 .and().formLogin()
                 .and().logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"))

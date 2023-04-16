@@ -4,10 +4,14 @@
 	<meta charset="UTF-8">
 	<title>Tasks</title>
 </head>
-<body>
+<body th:data-modified="${modified}">
 	<h1>Tasks</h1>
 	<button onclick="window.location.href = '/';">Home</button><br>
 	<button onclick="window.location.href = '/tasks/new';">New task</button><br>
+	<th:block th:if="${message}">
+		<hr>
+		<h2 th:text="${message}"/>
+	</th:block>
 	<hr>
 	<div th:each="task : ${tasks}">
 		<span th:style="${task.style}">
@@ -32,5 +36,23 @@
 		</form>
 		<hr>
 	</div>
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script>
+	$(document).ready(function() {
+		history.replaceState(null, null, '/tasks');
+		const modifiedElement = document.querySelector("body");
+		const modifiedValue = modifiedElement.getAttribute("data-modified");
+		console.log(modifiedValue);
+		setInterval(function() {
+			$.get("/getLastModified", function(result) {
+				console.log(result);
+				console.log(modifiedValue);
+				if (result != modifiedValue) {
+					window.location.replace("/tasks?message=You have a new task!");
+				}
+			});
+		}, 5000);
+	});
+	</script>
 </body>
 </html>

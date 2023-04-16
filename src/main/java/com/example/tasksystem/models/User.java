@@ -4,6 +4,7 @@ import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -31,6 +32,11 @@ public class User {
      * Пароль пользователя.
      */
     private String password;
+
+    /**
+     * Время последнего изменения списка задач.
+     */
+    private LocalDateTime lastModified;
 
     /**
      * Набор ролей пользователя.
