@@ -56,6 +56,7 @@ public class User {
      * Создает нового пользователя без параметров.
      */
     public User() {
+        lastModified = LocalDateTime.now();
     }
 
     /**
@@ -68,6 +69,7 @@ public class User {
         this.username = username;
         this.password = password;
         this.roles = Collections.singleton(Role.USER);
+        this.lastModified = LocalDateTime.now();
     }
 
     /**

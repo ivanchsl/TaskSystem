@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 
 import java.security.Principal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +49,7 @@ class TasksControllerTest {
         user = new User();
         user.setUsername("testuser");
         user.setId(1L);
+        user.setLastModified(LocalDateTime.of(2023, 4, 1, 10, 0));
         tasks = Arrays.asList(
                 new Task("Task1", "Description1", user, LocalDate.now()),
                 new Task("Task2", "Description2", user, LocalDate.now().plusDays(1))
@@ -55,12 +57,12 @@ class TasksControllerTest {
         user.setTasks(tasks);
     }
 
-    /*@Test
+    @Test
     void testTasksIfAuthorized() {
         when(principal.getName()).thenReturn("testuser");
         when(userRepository.findByUsername("testuser")).thenReturn(user);
 
-        String result = tasksController.tasks(principal, model);
+        String result = tasksController.tasks(principal, model, null);
         assertEquals("tasks", result);
         verify(userRepository).findByUsername("testuser");
         verify(model).addAttribute("tasks", tasks);
@@ -68,9 +70,9 @@ class TasksControllerTest {
 
     @Test
     void testTasksIfUnauthorized() {
-        String result = tasksController.tasks(null, model);
+        String result = tasksController.tasks(null, model, null);
         assertEquals("redirect:/", result);
-    }*/
+    }
 
     @Test
     void testNewTaskIfAuthorized() {
@@ -149,7 +151,7 @@ class TasksControllerTest {
         when(taskRepository.findById(Long.parseLong(taskId))).thenReturn(Optional.of(tasks.get(0)));
 
         String result = tasksController.taskForm(principal, taskId, userId, action);
-        assertEquals("redirect:/tasks", result);
+        assertEquals("redirect:/tasks?message=Error: Target user not found.", result);
         verify(taskRepository).findById(Long.parseLong(taskId));
         verify(taskRepository, never()).save(tasks.get(0));
     }
@@ -166,7 +168,7 @@ class TasksControllerTest {
         when(taskRepository.findById(Long.parseLong(taskId))).thenReturn(Optional.of(tasks.get(0)));
 
         String result = tasksController.taskForm(principal, taskId, userId, action);
-        assertEquals("redirect:/tasks", result);
+        assertEquals("redirect:/tasks?message=Error: You can't do anything with other user's task.", result);
         verify(taskRepository).findById(Long.parseLong(taskId));
         verify(taskRepository, never()).save(tasks.get(0));
     }
@@ -177,7 +179,7 @@ class TasksControllerTest {
         String userId = "1";
         String action = "delete";
         String result = tasksController.taskForm(null, taskId, userId, action);
-        assertEquals("redirect:/tasks", result);
+        assertEquals("redirect:/tasks?message=Error: You must be authorized.", result);
     }
 
     @Test
@@ -187,7 +189,23 @@ class TasksControllerTest {
         String action = "delete";
         when(taskRepository.findById(Long.parseLong(taskId))).thenReturn(Optional.empty());
         String result = tasksController.taskForm(principal, taskId, userId, action);
-        assertEquals("redirect:/tasks", result);
+        assertEquals("redirect:/tasks?message=Error: Task not found.", result);
+    }
+
+    @Test
+    void testGetLastModifiedIfAuthorized() {
+        when(principal.getName()).thenReturn("testuser");
+        when(userRepository.findByUsername("testuser")).thenReturn(user);
+
+        String result = tasksController.getLastModified(principal);
+        assertEquals("2023-04-01T10:00", result);
+        verify(userRepository).findByUsername("testuser");
+    }
+
+    @Test
+    void testGetLastModifiedIfUnauthorized() {
+        String result = tasksController.getLastModified(null);
+        assertEquals("", result);
     }
 
 }

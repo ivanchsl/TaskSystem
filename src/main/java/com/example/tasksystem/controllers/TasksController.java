@@ -138,20 +138,16 @@ public class TasksController {
         if ("throw".equals(action)) {
             Optional<User> optionalUser = userRepository.findById(parseLong(userId));
             if (optionalUser.isEmpty()) {
-                return "redirect:/tasks?message=Error: User not found.";
+                return "redirect:/tasks?message=Error: Target user not found.";
             }
             User targetUser = optionalUser.get();
             task.setUser(targetUser);
             taskRepository.save(task);
             targetUser.setLastModified(LocalDateTime.now());
             userRepository.save(targetUser);
-            user.setLastModified(LocalDateTime.now());
-            userRepository.save(user);
         }
         if ("remove".equals(action)) {
             taskRepository.delete(task);
-            user.setLastModified(LocalDateTime.now());
-            userRepository.save(user);
         }
         return "redirect:/tasks";
     }
