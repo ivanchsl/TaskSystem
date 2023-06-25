@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>User tasks</title>
+</head>
+<body>
+	<h1>User tasks</h1>
+	<button onclick="window.location.href = '/';">Home</button><br>
+	<th:block th:if="${message}">
+		<hr>
+		<h2 th:text="${message}"/>
+	</th:block>
+	<hr>
+	<form action="/admin" method="get">
+		<label for="users">User:</label>
+		<select name="userId" id="users" onchange="this.form.submit()">
+			<option value="">All users</option>
+			<option th:each="user : ${users}" th:value="${user.id}" th:text="${user.username}" th:selected="${user.id == selectedUser?.id}"></option>
+		</select>
+	</form>
+	<hr>
+	<th:block th:if="${selectedUser}">
+		<form action="/admin/newTaskForm" method="get">
+			<input type="hidden" name="userId" th:value="${selectedUser.id}">
+			<input type="text" name="title" placeholder="Title"><br>
+			<input type="text" name="description" placeholder="Description"><br>
+			<input type="date" name="deadline" min="2000-01-01" max="2099-12-31">
+			<input type="submit" value="Create"><br>
+		</form>
+		<hr>
+	</th:block>
+	<div th:each="task : ${tasks}">
+		<span th:style="${task.style}">
+			<h3 th:text="${task.title}"/>
+			<h3 th:text="${task.start}+' - '+${task.deadline}"></h3>
+			<h3 th:text="${task.description}"/>
+		</span>
+		<th:block th:if="${task.throwable == 0}">
+			<form action="/admin/form" method="get">
+				<input type="hidden" th:id="'taskId'+${task.id}" name="taskId" th:value="${task.id}">
+				<input type="radio" th:id="'remove'+${task.id}" name="action" value="remove">
+				<label th:for="'remove'+${task.id}">Remove</label>
+				<br>
+				<input type="submit" value="Submit"><br>
+			</form>
+		</th:block>
+		<th:block th:unless="${task.throwable == 0}">
+			<th:block th:if="${task.throwable == 1}">
+				<form action="/admin/form" method="get">
+					<input type="hidden" th:id="'taskId'+${task.id}" name="taskId" th:value="${task.id}">
+					<input type="radio" th:id="'remove'+${task.id}" name="action" value="remove">
+					<label th:for="'remove'+${task.id}">Remove</label>
+					<br>
+					<input type="submit" value="Submit"><br>
+				</form>
+			</th:block>
+			<th:block th:unless="${task.throwable == 1}">
+				<form action="/admin/form" method="get">
+					<input type="hidden" th:id="'taskId'+${task.id}" name="taskId" th:value="${task.id}">
+					<input type="radio" th:id="'accept'+${task.id}" name="action" value="accept">
+					<label th:for="'accept'+${task.id}">Accept</label>
+					<br>
+					<input type="radio" th:id="'decline'+${task.id}" name="action" value="decline">
+					<label th:for="'decline'+${task.id}">Decline</label>
+					<br>
+					<input type="submit" value="Submit"><br>
+				</form>
+			</th:block>
+		</th:block>
+		<hr>
+	</div>
+	<script th:inline="none">
+	document.addEventListener("DOMContentLoaded", function() {
+		history.replaceState(null, null, '/admin');
+	});
+	</script>
+</body>
+</html>

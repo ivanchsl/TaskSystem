@@ -56,7 +56,6 @@ public class User {
      * Создает нового пользователя без параметров.
      */
     public User() {
-        lastModified = LocalDateTime.now();
     }
 
     /**
@@ -64,11 +63,16 @@ public class User {
      * Устанавливает набор ролей по умолчанию, содержащий только роль USER.
      * @param username имя пользователя.
      * @param password пароль пользователя.
+     * @param isAdmin является ли пользователь администратором.
      */
-    public User(String username, String password) {
+    public User(String username, String password, boolean isAdmin) {
         this.username = username;
         this.password = password;
-        this.roles = Collections.singleton(Role.USER);
+        this.roles = new HashSet<>();
+        if (isAdmin) {
+            this.roles.add(Role.ADMIN);
+        }
+        this.roles.add(Role.USER);
         this.lastModified = LocalDateTime.now();
     }
 

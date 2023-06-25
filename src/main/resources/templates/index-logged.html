@@ -6,9 +6,20 @@
 </head>
 <body>
 	<h1>Task system</h1>
-	<h2 th:text="'Welcome, '+${username}"/>
+	<th:block th:if="${user.roles.contains(T(com.example.tasksystem.models.Role).ADMIN)}">
+		<h2 th:text="'Welcome, admin '+${user.username}"/>
+	</th:block>
+	<th:block th:unless="${user.roles.contains(T(com.example.tasksystem.models.Role).ADMIN)}">
+		<h2 th:text="'Welcome, '+${user.username}"/>
+	</th:block>
 	<button onclick="window.location.href = '/logout';">Sign out</button><br>
 	<br>
-	<button onclick="window.location.href = '/tasks';">Tasks</button><br>
+	<th:block th:if="${user.roles.contains(T(com.example.tasksystem.models.Role).USER)}">
+		<button onclick="window.location.href = '/tasks';">Tasks</button><br>
+	</th:block>
+	<th:block th:if="${user.roles.contains(T(com.example.tasksystem.models.Role).ADMIN)}">
+		<button onclick="window.location.href = '/admin';">Admin panel</button><br>
+		<button onclick="window.location.href = '/summary';">Summary</button><br>
+	</th:block>
 </body>
 </html>

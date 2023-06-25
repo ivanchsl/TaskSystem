@@ -5,6 +5,7 @@ import com.example.tasksystem.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -28,10 +29,13 @@ public class RegistrationController {
 
     /**
      * Отображает страницу регистрации.
+     * @param model модель для передачи данных на веб-страницу.
+     * @param message сообщение для пользователя.
      * @return имя файла веб-страницы.
      */
     @GetMapping("/reg")
-    public String reg() {
+    public String reg(Model model, @RequestParam(required = false) String message) {
+        model.addAttribute("message", message);
         return "reg";
     }
 
@@ -44,7 +48,15 @@ public class RegistrationController {
      */
     @GetMapping("/reg/form")
     public String regForm(@RequestParam String username, @RequestParam String password) {
-        userRepository.save(new User(username, passwordEncoder.encode(password)));
+        User user = userRepository.findByUsername(username);
+        if (user != null) {
+            return "redirect:/reg?message=Error: choose another username.";
+        }
+        if ("admin".equals(username)) {
+            userRepository.save(new User(username, passwordEncoder.encode(password), true));
+        } else {
+            userRepository.save(new User(username, passwordEncoder.encode(password), false));
+        }
         return "redirect:/";
     }
 

@@ -11,7 +11,7 @@ public enum Role implements GrantedAuthority {
     /**
      * Роль пользователя.
      */
-    USER;
+    USER, ADMIN;
 
     /**
      * Возвращает название роли.

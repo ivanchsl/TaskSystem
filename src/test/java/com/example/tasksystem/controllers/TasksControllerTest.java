@@ -51,8 +51,8 @@ class TasksControllerTest {
         user.setId(1L);
         user.setLastModified(LocalDateTime.of(2023, 4, 1, 10, 0));
         tasks = Arrays.asList(
-                new Task("Task1", "Description1", user, LocalDate.now()),
-                new Task("Task2", "Description2", user, LocalDate.now().plusDays(1))
+                new Task("Task1", "Description1", user, LocalDate.now(), 0),
+                new Task("Task2", "Description2", user, LocalDate.now().plusDays(1), 0)
         );
         user.setTasks(tasks);
     }

@@ -54,6 +54,6 @@ public class IndexControllerTest {
         assertThat(result).isEqualTo("index-logged");
         verify(principal).getName();
         verify(userRepository).findByUsername("testUser");
-        verify(model).addAttribute("username", "testUser");
+        verify(model).addAttribute("user", user);
     }
 }

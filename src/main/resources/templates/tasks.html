@@ -19,38 +19,58 @@
 			<h3 th:text="${task.start}+' - '+${task.deadline}"></h3>
 			<h3 th:text="${task.description}"/>
 		</span>
-		<form action="/tasks/form" method="get">
-			<input type="hidden" th:id="'taskId'+${task.id}" name="taskId" th:value="${task.id}">
-			<input type="radio" th:id="'throw'+${task.id}" name="action" value="throw">
-			<label th:for="'remove'+${task.id}">Throw</label>
-			<select name="userId">
-				<span th:each="user : ${users}">
-					<option th:value="${user.id}" th:text="${user.username}"/>
-				</span>
-			</select>
-			<br>
-			<input type="radio" th:id="'remove'+${task.id}" name="action" value="remove">
-			<label th:for="'remove'+${task.id}">Remove</label>
-			<br>
-			<input type="submit" value="Submit"><br>
-		</form>
+		<th:block th:if="${task.throwable == 0}">
+			<form action="/tasks/form" method="get">
+				<input type="hidden" th:id="'taskId'+${task.id}" name="taskId" th:value="${task.id}">
+				<input type="radio" th:id="'throw'+${task.id}" name="action" value="throw">
+				<label th:for="'throw'+${task.id}">Throw</label>
+				<select name="userId">
+					<span th:each="listUser : ${users}">
+						<th:block th:unless="${listUser.id == user.id}">
+							<option th:value="${listUser.id}" th:text="${listUser.username}"/>
+						</th:block>
+					</span>
+				</select>
+				<br>
+				<input type="radio" th:id="'remove'+${task.id}" name="action" value="remove">
+				<label th:for="'remove'+${task.id}">Remove</label>
+				<br>
+				<input type="submit" value="Submit"><br>
+			</form>
+		</th:block>
+		<th:block th:unless="${task.throwable == 0}">
+			<th:block th:if="${task.throwable == 1}">
+				<form action="/tasks/form" method="get">
+					<input type="hidden" th:id="'taskId'+${task.id}" name="taskId" th:value="${task.id}">
+					<input type="radio" th:id="'complete'+${task.id}" name="action" value="complete">
+					<label th:for="'complete'+${task.id}">Complete</label>
+					<br>
+					<input type="submit" value="Submit"><br>
+				</form>
+			</th:block>
+			<th:block th:unless="${task.throwable == 1}">
+				<p>Pending review</p>
+			</th:block>
+		</th:block>
 		<hr>
 	</div>
-	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-	<script>
-	$(document).ready(function() {
+	<script th:inline="none">
+	document.addEventListener("DOMContentLoaded", function() {
 		history.replaceState(null, null, '/tasks');
 		const modifiedElement = document.querySelector("body");
 		const modifiedValue = modifiedElement.getAttribute("data-modified");
-		console.log(modifiedValue);
 		setInterval(function() {
-			$.get("/getLastModified", function(result) {
-				console.log(result);
-				console.log(modifiedValue);
-				if (result != modifiedValue) {
-					window.location.replace("/tasks?message=You have a new task!");
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", "/getLastModified", true);
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4 && xhr.status === 200) {
+					var result = xhr.responseText;
+					if (result != modifiedValue) {
+						window.location.replace("/tasks?message=You have a new task!");
+					}
 				}
-			});
+			};
+			xhr.send();
 		}, 5000);
 	});
 	</script>

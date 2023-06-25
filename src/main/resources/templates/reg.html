@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8">
 	<title>Sign up</title>
@@ -7,11 +7,20 @@
 <body>
 	<h1>Sign up</h1>
 	<button onclick="window.location.href = '/';">Home</button><br>
+	<th:block th:if="${message}">
+		<hr>
+		<h2 th:text="${message}"/>
+	</th:block>
 	<hr>
 	<form action="/reg/form" method="get">
 		<input type="text" name="username" placeholder="Username"><br>
 		<input type="text" name="password" placeholder="Password"><br>
 		<input type="submit" value="Sign up"><br>
 	</form>
+	<script th:inline="none">
+	document.addEventListener("DOMContentLoaded", function() {
+		history.replaceState(null, null, '/reg');
+	});
+	</script>
 </body>
 </html>

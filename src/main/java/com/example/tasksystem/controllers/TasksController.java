@@ -58,6 +58,7 @@ public class TasksController {
         tasks.sort(new TaskComparator());
         model.addAttribute("tasks", tasks);
         model.addAttribute("users", userRepository.findAll());
+        model.addAttribute("user", user);
         model.addAttribute("modified", user.getLastModified().toString());
         model.addAttribute("message", message);
         return "tasks";
@@ -108,8 +109,7 @@ public class TasksController {
             return "redirect:/";
         }
         User user = userRepository.findByUsername(principal.getName());
-        taskRepository.save(new Task(title, description, user, LocalDate.parse(deadline)));
-        user.setLastModified(LocalDateTime.now());
+        taskRepository.save(new Task(title, description, user, LocalDate.parse(deadline), 0));
         userRepository.save(user);
         return "redirect:/tasks";
     }
@@ -118,11 +118,11 @@ public class TasksController {
      * Обрабатывает запрос на изменение задачи.
      * @param taskId идентификатор задачи, над которой производится действие.
      * @param userId идентификатор пользователя, которому нужно передать задачу.
-     * @param action действие, которое нужно выполнить: передача или удаление задачи.
+     * @param action действие, которое нужно выполнить.
      * @return перенаправление на страницу со списком задач пользователя с, возможно, сообщением.
      */
     @GetMapping("/tasks/form")
-    public String taskForm(Principal principal, @RequestParam String taskId, @RequestParam String userId, @RequestParam(required = false) String action) {
+    public String taskForm(Principal principal, @RequestParam String taskId, @RequestParam(required = false) String userId, @RequestParam(required = false) String action) {
         if (principal == null) {
             return "redirect:/tasks?message=Error: You must be authorized.";
         }
@@ -136,6 +136,9 @@ public class TasksController {
             return "redirect:/tasks?message=Error: You can't do anything with other user's task.";
         }
         if ("throw".equals(action)) {
+            if (task.getThrowable() != 0) {
+                return "redirect:/tasks?message=Error: Task is not throwable.";
+            }
             Optional<User> optionalUser = userRepository.findById(parseLong(userId));
             if (optionalUser.isEmpty()) {
                 return "redirect:/tasks?message=Error: Target user not found.";
@@ -147,7 +150,17 @@ public class TasksController {
             userRepository.save(targetUser);
         }
         if ("remove".equals(action)) {
+            if (task.getThrowable() != 0) {
+                return "redirect:/tasks?message=Error: You must complete this task.";
+            }
             taskRepository.delete(task);
+        }
+        if ("complete".equals(action)) {
+            if (task.getThrowable() == 0) {
+                return "redirect:/tasks?message=Error: Use Remove action.";
+            }
+            task.setThrowable(-1);
+            taskRepository.save(task);
         }
         return "redirect:/tasks";
     }
@@ -155,7 +168,7 @@ public class TasksController {
 }
 
 /**
- * Компаратор для сортировки списка задач по дедлайну.
+ * Компаратор для сортировки списка задач.
  */
 class TaskComparator implements Comparator<Task> {
 
@@ -167,7 +180,13 @@ class TaskComparator implements Comparator<Task> {
      */
     @Override
     public int compare(Task o1, Task o2) {
-        return o1.getDeadline().compareTo(o2.getDeadline());
+        if (o1.isCompleted() && !o2.isCompleted()) {
+            return 1;
+        } else if (!o1.isCompleted() && o2.isCompleted()) {
+            return -1;
+        } else {
+            return o1.getDeadline().compareTo(o2.getDeadline());
+        }
     }
 
 }

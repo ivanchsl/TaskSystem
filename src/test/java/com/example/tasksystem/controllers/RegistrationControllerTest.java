@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.ui.Model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -21,6 +22,9 @@ public class RegistrationControllerTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private Model model;
 
     @InjectMocks
     private RegistrationController registrationController;
@@ -35,7 +39,8 @@ public class RegistrationControllerTest {
 
     @Test
     void reg_ReturnsRegView() {
-        String result = registrationController.reg();
+        String result = registrationController.reg(model, null);
+        verify(model).addAttribute("message", null);
         assertThat(result).isEqualTo("reg");
         verifyNoInteractions(userRepository, passwordEncoder);
     }

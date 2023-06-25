@@ -43,6 +43,11 @@ public class Task {
     private LocalDate deadline;
 
     /**
+     * Можно ли передать задачу другому пользователю и текущий статус.
+     */
+    private int throwable;
+
+    /**
      * Стиль задачи, используемый для отображения на странице задач.
      */
     private String style;
@@ -66,13 +71,15 @@ public class Task {
      * @param description описание задачи.
      * @param user пользователь, которому принадлежит задача.
      * @param deadline дата дедлайна.
+     * @param throwable можно ли передать задачу другому пользователю.
      */
-    public Task(String title, String description, User user, LocalDate deadline) {
+    public Task(String title, String description, User user, LocalDate deadline, int throwable) {
         this.title = title;
         this.description = description;
         this.user = user;
         this.start = LocalDate.now();
         this.deadline = deadline;
+        this.throwable = throwable;
         updateStyle();
     }
 
@@ -95,4 +102,11 @@ public class Task {
         }
     }
 
+    /**
+     * Возвращает, является ли задача выполненной и ожидающей проверки.
+     * @return ответ на запрос.
+     */
+    public boolean isCompleted() {
+        return throwable == -1;
+    }
 }

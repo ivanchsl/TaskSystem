@@ -35,7 +35,7 @@ public class IndexController {
             return "index";
         }
         User user = userRepository.findByUsername(principal.getName());
-        model.addAttribute("username", user.getUsername());
+        model.addAttribute("user", user);
         return "index-logged";
     }
 

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Summary</title>
+</head>
+<body>
+	<h1>Summary</h1>
+	<button onclick="window.location.href = '/';">Home</button><br>
+	<hr>
+	<h3 th:text="'Last update: '+${updated}"/>
+	<p th:text="'Users: '+${numUsers}"/>
+	<p th:text="'Users without tasks: '+${numFreeUsers}"/>
+	<p th:text="'Tasks: '+${numTasks}"/>
+	<p th:text="'Expired tasks: '+${numExpired}"/>
+	<p th:text="'Users with expired tasks: '+${numMissedDeadline}"/>
+	<p th:text="'Pending review: '+${numReview}"/>
+</body>
+</html>
